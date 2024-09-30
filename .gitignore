@@ -1,0 +1,19 @@
+# Training data and models should not be committed to the repository
+runs/
+data/
+datasets/
+models/
+
+# Train and test data should not be committed to the repository
+*.jpg
+*.jpw
+*.prj
+
+# Test code
+**playground**
+
+# Weights and biases
+*.pt
+*.pth
+*.h5
+*.tflite
