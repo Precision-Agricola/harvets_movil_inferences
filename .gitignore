@@ -3,6 +3,7 @@ runs/
 data/
 datasets/
 models/
+test_images/
 
 # Train and test data should not be committed to the repository
 *.jpg
