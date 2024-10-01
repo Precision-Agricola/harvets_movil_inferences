@@ -8,6 +8,8 @@ models/
 *.jpg
 *.jpw
 *.prj
+*.mp4
+*.avi
 
 # Test code
 **playground**
