@@ -7,6 +7,6 @@ roboflow:
   url: https://universe.roboflow.com/psa00/merma-in-situ/dataset/1
   version: 1
   workspace: psa00
-test: C:/Users/zned897/Documents/GitHub/Object-Detection-Android-App/datasets/merma_in_situ/test/images
-train: C:/Users/zned897/Documents/GitHub/Object-Detection-Android-App/datasets/merma_in_situ/train/images
-val: C:/Users/zned897/Documents/GitHub/Object-Detection-Android-App/datasets/merma_in_situ/valid/images
+test: /Users/eduardosantos/Documents/github/harvets_movil_inferences/datasets/merma_in_situ/test/images
+train: /Users/eduardosantos/Documents/github/harvets_movil_inferences/datasets/merma_in_situ/train/images
+val: /Users/eduardosantos/Documents/github/harvets_movil_inferences/datasets/merma_in_situ/valid/images
