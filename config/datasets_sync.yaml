@@ -6,3 +6,8 @@ datasets:
     format: "yolov8"
     output_dir: "datasets/merma_in_situ"
 
+  - workspace: "psa01"
+    project: "jima_in_situ"
+    version: 1
+    format: "yolov8"
+    output_dir: "datasets/jima_in_situ"

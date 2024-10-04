@@ -25,3 +25,4 @@ test_images/
 *.pth
 *.h5
 *.tflite
+*.onnx

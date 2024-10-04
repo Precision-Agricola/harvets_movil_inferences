@@ -1,7 +1,7 @@
 model:
-  name: "merma_in_situ_v1"
-  data_yaml: "datasets/merma_in_situ/data.yaml"
-  output_dir: "models/merma_in_situ_v1"
+  name: "jima_in_situ"
+  data_yaml: "datasets/jima_in_situ/data.yaml"
+  output_dir: "models/jima_in_situ"
 
 training:
   epochs: 50

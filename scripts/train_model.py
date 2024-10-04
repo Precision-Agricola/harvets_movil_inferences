@@ -1,3 +1,9 @@
+#TODO: Add script docstrings
+
+"""
+Script to train a yolo model using ultralytics and yaml conf files 
+
+"""
 import sys
 from pathlib import Path
 import torch
@@ -6,7 +12,6 @@ from ultralytics import YOLO
 from wasabi import msg
 import yaml
 
-# Add the project root directory to Python's path
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
 
@@ -45,16 +50,20 @@ def train_model(config: dict):
     if config['training']['device'] == 'auto':
         if torch.cuda.is_available():
             device = 'cuda'
+            msg.good("CUDA is available. Training on GPU.")
         elif torch.backends.mps.is_available():
             device = 'mps'
+            msg.info("MPS is available. Training on MPS.")
         else:
             device = 'cpu'
+            msg.warn("CUDA and MPS are not available. Training on CPU.")
     else:
         device = config['training']['device']
     
+    #TODO: Verify that training on MPS works as expected
     msg.info(f"Training on {device.upper()}.")
 
-    # Load the YOLOv8 model
+    # Load the YOLOv8 model (pre-trained weights should be downloaded in root)
     model = YOLO('yolov8n.pt')
 
     # Specify a fixed name for the training run

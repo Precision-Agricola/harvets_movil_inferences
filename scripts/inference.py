@@ -8,62 +8,104 @@ In this code the inference is try to predict in images and video some of the mod
         output(str) - path for inference results
 
 
- #TODO - chain the absolute path for relative path (see the deafault conf file for the ultralytics app roam data
- #TODO -  
 """ 
-import os
+import sys
+from pathlib import Path
+import shutil
+import yaml
 import cv2
 import argparse
 from ultralytics import YOLO
+from wasabi import msg
 
-def run_inference(model_path, input_path, output_path, imgsz=640, conf=0.5):
-    # Cargar el modelo
-    model = YOLO(model_path)
+# Add the project root directory to Python's path
+root_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_dir))
 
-    # Verificar si la entrada es una imagen o un video
-    if os.path.isfile(input_path):
-        input_ext = os.path.splitext(input_path)[1].lower()
-        if input_ext in ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']:
-            is_image = True
-        elif input_ext in ['.mp4', '.avi', '.mov', '.mkv']:
-            is_image = False
+def load_config(config_path: str = "config/inference_config.yaml") -> dict:
+    """
+    Load the inference configuration from a YAML file.
+
+    Args:
+        config_path (str): Path to the configuration file.
+
+    Returns:
+        dict: Configuration data.
+    """
+    with open(config_path, 'r') as file:
+        return yaml.safe_load(file)
+
+def run_inference(model: YOLO, input_path: Path, output_path: Path, imgsz: int, conf: float):
+    """
+    Run inference on an image or video file.
+
+    Args:
+        model (YOLO): Loaded YOLO model.
+        input_path (Path): Path to the input file.
+        output_path (Path): Path to save the output.
+        imgsz (int): Input image size.
+        conf (float): Confidence threshold.
+    """
+    msg.info(f"Processing: {input_path}")
+    if input_path.is_file():
+        if input_path.suffix.lower() in ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']:
+            msg.info(f"Processing image: {input_path}")
+            results = model.predict(source=str(input_path), save=True, imgsz=imgsz, conf=conf)
+            processed_path = Path(results[0].save_dir) / input_path.name
+            output_file = output_path / input_path.name
+            shutil.move(str(processed_path), str(output_file))
+            msg.good(f"Image processed and saved to: {output_file}")
+        elif input_path.suffix.lower() in ['.mp4', '.avi', '.mov', '.mkv']:
+            msg.info(f"Processing video: {input_path}")
+            results = model.predict(source=str(input_path), save=True, imgsz=imgsz, conf=conf)
+            processed_path = Path(results[0].save_dir) / input_path.name
+            output_file = output_path / input_path.name
+            shutil.move(str(processed_path), str(output_file))
+            msg.good(f"Video processed and saved to: {output_file}")
         else:
-            raise ValueError("El archivo de entrada no es una imagen o un video soportado.")
+            msg.warn(f"Unsupported file type: {input_path}")
+    elif input_path.is_dir():
+        msg.info(f"Processing directory: {input_path}")
+        for file in input_path.iterdir():
+            run_inference(model, file, output_path, imgsz, conf)
     else:
-        raise FileNotFoundError(f"No se encontró el archivo de entrada: {input_path}")
+        msg.fail(f"Input path does not exist: {input_path}")
 
-    if is_image:
-        # Realizar inferencia en una imagen
-        results = model.predict(source=input_path, save=True, imgsz=imgsz, conf=conf)
-        # Mover la imagen procesada al directorio de salida
-        processed_image_path = results[0].save_dir / results[0].path.name
-        os.makedirs(output_path, exist_ok=True)
-        output_image_path = os.path.join(output_path, os.path.basename(processed_image_path))
-        os.rename(processed_image_path, output_image_path)
-        print(f"Inferencia completada. Imagen guardada en: {output_image_path}")
-    else:
-        # Realizar inferencia en un video
-        results = model.predict(source=input_path, save=True, imgsz=imgsz, conf=conf)
-        # Mover el video procesado al directorio de salida
-        processed_video_path = results[0].save_dir / results[0].path.name
-        os.makedirs(output_path, exist_ok=True)
-        output_video_path = os.path.join(output_path, os.path.basename(processed_video_path))
-        os.rename(processed_video_path, output_video_path)
-        print(f"Inferencia completada. Video guardado en: {output_video_path}")
+def main(config_path: str = "inference_config.yaml"):
+    """
+    Main function to load config and run inference.
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Realizar inferencia con un modelo YOLOv8 en una imagen o video.")
-    parser.add_argument('--model', type=str, required=True, help='Ruta al modelo entrenado (.pt o .tflite)')
-    parser.add_argument('--input', type=str, required=True, help='Ruta a la imagen o video de entrada')
-    parser.add_argument('--output', type=str, default='outputs', help='Directorio de salida para los resultados')
-    parser.add_argument('--imgsz', type=int, default=640, help='Tamaño de las imágenes de entrada')
-    parser.add_argument('--conf', type=float, default=0.5, help='Umbral de confianza')
-    return parser.parse_args()
+    Args:
+        config_path (str): Path to the configuration file.
+    """
+    config = load_config(config_path)
+    
+    model_path = Path(config['model']['path'])
+    input_path = Path(config['paths']['input'])
+    output_path = Path(config['paths']['output'])
+    imgsz = config['inference']['imgsz']
+    conf = config['inference']['conf']
 
-def main():
-    args = parse_args()
-    run_inference(args.model, args.input, args.output, imgsz=args.imgsz, conf=args.conf)
+    if not model_path.exists():
+        msg.fail(f"Model not found at: {model_path}")
+        return
+
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    msg.info(f"Loading model from: {model_path}")
+    model = YOLO(str(model_path))
+
+    run_inference(model, input_path, output_path, imgsz, conf)
 
 if __name__ == '__main__':
-    main()
+
+    parser = argparse.ArgumentParser(description="Run inference with a YOLOv8 model on images or videos.")
+    parser.add_argument(
+        '--config',
+        type=str,
+        default='config/inference_config.yaml',
+        help='Path to the configuration file'
+    )
+    args = parser.parse_args()
+    main(args.config)
 
