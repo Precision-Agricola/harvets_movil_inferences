@@ -1,0 +1,11 @@
+model:
+  name: "merma_in_situ_v1"
+  data_yaml: "datasets/merma_in_situ/data.yaml"
+  output_dir: "models/merma_in_situ_v1"
+
+training:
+  epochs: 50
+  batch_size: 16
+  imgsz: 640
+  device: "auto"  # "auto", "cuda", or "cpu"
+

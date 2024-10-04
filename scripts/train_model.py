@@ -1,108 +1,98 @@
-import os
 import sys
+from pathlib import Path
 import torch
 import shutil
-import yaml
-from roboflow import Roboflow
 from ultralytics import YOLO
-from dotenv import load_dotenv
+from wasabi import msg
+import yaml
 
-load_dotenv()
+# Add the project root directory to Python's path
+root_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_dir))
 
-def download_dataset(api_key, workspace_name, project_name, dataset_version, dataset_format, dataset_dir):
-    if os.path.exists(dataset_dir):
-        print(f"El dataset ya existe en '{dataset_dir}'. No se descargará nuevamente.")
-    else:
-        print("Descargando el dataset desde Roboflow...")
-        rf = Roboflow(api_key=api_key)
-        project = rf.workspace(workspace_name).project(project_name)
-        version = project.version(dataset_version)
-        version.download(dataset_format, location=dataset_dir)
-        print(f"Dataset descargado en '{dataset_dir}'.")
-    
-    # Ajustar las rutas en data.yaml
-    data_yaml_path = os.path.join(dataset_dir, 'data.yaml')
-    with open(data_yaml_path, 'r') as f:
-        data_yaml = yaml.safe_load(f)
-    
-    # Obtener rutas absolutas
-    dataset_abs_path = os.path.abspath(dataset_dir)
-    data_yaml['train'] = os.path.join(dataset_abs_path, 'train', 'images').replace('\\', '/')
-    data_yaml['val'] = os.path.join(dataset_abs_path, 'valid', 'images').replace('\\', '/')
-    data_yaml['test'] = os.path.join(dataset_abs_path, 'test', 'images').replace('\\', '/')
-    
-    # Guardar los cambios
-    with open(data_yaml_path, 'w') as f:
-        yaml.dump(data_yaml, f)
-    
-    print("Archivo data.yaml actualizado con rutas absolutas.")
+def load_config(config_path: str = "config/training_config.yaml") -> dict:
+    """
+    Load the training configuration from a YAML file.
 
-def train_model(data_yaml, model_output_dir, epochs=50, batch_size=16, imgsz=640):
-    model_path = os.path.join(model_output_dir, 'best.pt')
-    if os.path.exists(model_path):
-        print(f"El modelo ya ha sido entrenado y se encuentra en '{model_path}'. No se reentrenará.")
-    else:
-        print("Entrenando el modelo con YOLOv8...")
+    Args:
+        config_path (str): Path to the configuration file.
 
-        # Verificar si hay GPU disponible y registrar el dispositivo
+    Returns:
+        dict: Configuration data.
+    """
+    with open(config_path, 'r') as file:
+        return yaml.safe_load(file)
+
+def train_model(config: dict):
+    """
+    Train the YOLOv8 model based on the provided configuration.
+
+    Args:
+        config (dict): Training configuration.
+    """
+    model_name = config['model']['name']
+    data_yaml = config['model']['data_yaml']
+    model_output_dir = Path(config['model']['output_dir'])
+    model_path = model_output_dir / 'best.pt'
+
+    if model_path.exists():
+        msg.info(f"Model already trained and exists at '{model_path}'. Skipping training.")
+        return
+
+    msg.info("Training YOLOv8 model...")
+
+    # Determine the device: First try CUDA, then MPS, otherwise fallback to CPU
+    if config['training']['device'] == 'auto':
         if torch.cuda.is_available():
             device = 'cuda'
-            print("Entrenando en GPU.")
+        elif torch.backends.mps.is_available():
+            device = 'mps'
         else:
             device = 'cpu'
-            print("Entrenando en CPU.")
-
-        # Cargar el modelo y asignar el dispositivo
-        model = YOLO('yolov8n.pt')
-
-        # Especificar un nombre fijo para el entrenamiento
-        run_name = 'custom_train'
-
-        # Eliminar el directorio de entrenamiento previo si existe (opcional)
-        run_dir = os.path.join('runs', 'detect', run_name)
-        if os.path.exists(run_dir):
-            shutil.rmtree(run_dir)
-
-        # Iniciar el entrenamiento y pasar el dispositivo
-        model.train(
-            data=data_yaml,
-            epochs=epochs,
-            batch=batch_size,
-            imgsz=imgsz,
-            device=device,
-            name=run_name
-        )
-
-        # Mueve el modelo entrenado a la carpeta de salida
-        os.makedirs(model_output_dir, exist_ok=True)
-        src_model_path = os.path.join('runs', 'detect', run_name, 'weights', 'best.pt')
-        if os.path.exists(src_model_path):
-            shutil.copy(src_model_path, model_path)
-            print(f"Modelo entrenado y guardado en '{model_path}'.")
-        else:
-            print(f"No se encontró el archivo '{src_model_path}'. Asegúrate de que el entrenamiento se completó correctamente.")
-
-def main():
-    # Configuración
-    api_key = os.getenv('ROBOFLOW_API_KEY')
-    if api_key:
-        print(f"RF API Key: {api_key[:4]}***")
     else:
-        raise ValueError("No se pudo leer la API Key de Roboflow. Asegúrate de que está configurada en el archivo .env")
+        device = config['training']['device']
+    
+    msg.info(f"Training on {device.upper()}.")
 
-    workspace_name = 'psa01'
-    project_name = 'merma_in_situ'
-    dataset_version = 1
-    dataset_format = 'yolov8'
-    dataset_dir = os.path.join('datasets', 'merma_in_situ')
-    data_yaml = os.path.join(dataset_dir, 'data.yaml')
-    model_output_dir = os.path.join('models', 'merma_in_situ_v1')
+    # Load the YOLOv8 model
+    model = YOLO('yolov8n.pt')
 
-    # Descarga del dataset
-    download_dataset(api_key, workspace_name, project_name, dataset_version, dataset_format, dataset_dir)
+    # Specify a fixed name for the training run
+    run_name = f'{model_name}_train'
 
-    # Entrenamiento del modelo
-    train_model(data_yaml, model_output_dir, epochs=50, batch_size=16, imgsz=640)
+    # Remove previous training directory if it exists
+    run_dir = Path('runs') / 'detect' / run_name
+    if run_dir.exists():
+        shutil.rmtree(run_dir)
+
+    # Start the training
+    model.train(
+        data=data_yaml,
+        epochs=config['training']['epochs'],
+        batch=config['training']['batch_size'],
+        imgsz=config['training']['imgsz'],
+        device=device,  # Here we pass the dynamically selected device
+        name=run_name
+    )
+
+    # Move the trained model to the output directory
+    model_output_dir.mkdir(parents=True, exist_ok=True)
+    src_model_path = run_dir / 'weights' / 'best.pt'
+    if src_model_path.exists():
+        shutil.copy(src_model_path, model_path)
+        msg.good(f"Trained model saved to '{model_path}'.")
+    else:
+        msg.fail(f"Model file not found at '{src_model_path}'. Check if training completed successfully.")
+
+def main(config_path: str = "config/training_config.yaml"):
+    """
+    Main function to load config and train the model.
+
+    Args:
+        config_path (str): Path to the configuration file.
+    """
+    config = load_config(config_path)
+    train_model(config)
 
 if __name__ == '__main__':
     main()
