@@ -5,12 +5,16 @@ datasets/
 models/
 test_images/
 
+# DS Store files for Mac
+*.DS_Store
+
 # Train and test data should not be committed to the repository
 *.jpg
 *.jpw
 *.prj
 *.mp4
 *.avi
+*.png
 
 # Test code
 **playground**
@@ -21,3 +25,4 @@ test_images/
 *.pth
 *.h5
 *.tflite
+*.onnx
