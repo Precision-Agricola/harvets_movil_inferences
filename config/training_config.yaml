@@ -4,7 +4,7 @@ model:
   output_dir: "models/jima_in_situ"
 
 training:
-  epochs: 50
+  epochs: 10 
   batch_size: 16
   imgsz: 640
   device: "auto"  # "auto", "cuda", or "cpu"

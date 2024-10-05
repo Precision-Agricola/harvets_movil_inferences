@@ -1,5 +1,5 @@
 model:
-  path: "models/merma_in_situ_v1/best.pt"
+  path: "models/jima_in_situ/best.pt"
 
 inference:
   imgsz: 640
