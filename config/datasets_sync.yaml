@@ -11,3 +11,16 @@ datasets:
     version: 1
     format: "yolov8"
     output_dir: "datasets/jima_in_situ"
+
+  - workspace: "psa00"
+    project: "pineaple-fruit-count"
+    version: 1
+    format: "yolov8"
+    output_dir: "datasets/pineaple_fruit_count"
+
+  - workspace: "psa00"
+    project: "crop_segmentation-tn6qn"
+    version: 1
+    format: "yolov8"
+    output_dir: "datasets/crop_segmentation"
+

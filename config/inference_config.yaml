@@ -1,10 +1,10 @@
 model:
-  path: "models/jima_in_situ/best.pt"
+  path: "models/pineaple_fruit_count/best.pt"
 
 inference:
   imgsz: 640
   conf: 0.05
 
 paths:
-  input: "data/agave/counting_data/agave_in_situ_count_demo.mp4"
-  output: "data/agave/counting_data/output/agave_in_situ_count_demo_output"
+  input: "data/pineaple/counting_data/pineaple_count.mp4"
+  output: "data/pineaple/counting_data/output/pineaple_count"

@@ -1,16 +1,15 @@
 #%%
 import torch
+from wasabi import msg
 
-"""
-print(f"Versión de PyTorch: {torch.__version__}")
-print(f"CUDA disponible: {torch.cuda.is_available()}")
-print(f"Versión de CUDA: {torch.version.cuda}")
 
-"""
-if torch.backends.mps.is_available():
-    mps_device = torch.device("mps")
-    x = torch.ones(1, device=mps_device)
-    print(x)
+msg.info(f"Versión de PyTorch: {torch.__version__}")
+msg.info(f"Versión de CUDA: {torch.version.cuda}")
+
+if torch.cuda.is_available():
+    msg.good("CUDA is available")
+elif torch.backends.mps.is_available():
+    msg.good("MPS is available")
 else:
-    print("MPS device not found.")
+    msg.warn("CPU only")
 
