@@ -81,7 +81,7 @@ def main(config_path: str = "inference_config.yaml"):
     config = load_config(config_path)
     
     model_path = Path(config['model']['path'])
-    input_path = Path(config['paths']['input'])
+    input_path = Path(config['paths']['input']) #TODO: Add support for images or directories of images
     output_path = Path(config['paths']['output'])
     imgsz = config['inference']['imgsz']
     conf = config['inference']['conf']
@@ -95,7 +95,7 @@ def main(config_path: str = "inference_config.yaml"):
     msg.info(f"Loading model from: {model_path}")
     model = YOLO(str(model_path))
 
-    run_inference(model, input_path, output_path, imgsz, conf)
+    run_inference(model, input_path, output_path, imgsz, conf) #FIX: The output file is not saved correctly
 
 if __name__ == '__main__':
 
