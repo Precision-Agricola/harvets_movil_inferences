@@ -1,7 +1,7 @@
 model:
-  name: "pineaple_fruit_count"
-  data_yaml: "datasets/pineaple_fruit_count/data.yaml"
-  output_dir: "models/pineaple_fruit_count"
+  name: "crop_segmentation"
+  data_yaml: "datasets/crop_segmentation/data.yaml"
+  output_dir: "models/crop_segmentation"
 
 training:
   epochs: 250

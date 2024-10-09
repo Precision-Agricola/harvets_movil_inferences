@@ -1,5 +1,3 @@
-#TODO: Add script docstrings
-
 """
 Script to train a yolo model using ultralytics and yaml conf files 
 
@@ -11,6 +9,7 @@ import shutil
 from ultralytics import YOLO
 from wasabi import msg
 import yaml
+import argparse  # Import argparse
 
 root_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(root_dir))
@@ -60,7 +59,7 @@ def train_model(config: dict):
     else:
         device = config['training']['device']
     
-    #TODO: Verify that training on MPS works as expected
+    # TODO: Verify that training on MPS works as expected
     msg.info(f"Training on {device.upper()}.")
 
     # Load the YOLOv8 model (pre-trained weights should be downloaded in root)
@@ -104,5 +103,13 @@ def main(config_path: str = "config/training_config.yaml"):
     train_model(config)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description="Script to train a YOLOv8 model using Ultralytics and YAML config files.")
+    parser.add_argument(
+        '--config',
+        type=str,
+        default='config/training_config.yaml',
+        help='Path to the training configuration YAML file.'
+    )
+    args = parser.parse_args()
+    main(args.config)
 
