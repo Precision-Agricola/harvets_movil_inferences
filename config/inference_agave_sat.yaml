@@ -1,0 +1,11 @@
+model:
+  path: "models/crop_segmentation/best.pt"
+
+inference:
+  imgsz: 640 
+  conf: 0.05
+
+paths:
+  input: "data/crop_segmentation/segmentation/A1_R8C3_Tile_0_1.jpg"
+  output: "data/crop_segmentation/segmentation/output/"
+
