@@ -26,3 +26,8 @@ test_images/
 *.h5
 *.tflite
 *.onnx
+
+# System files
+*.log
+*.out
+*.env
