@@ -1,33 +1,94 @@
-# Object detection app using YOLOv8 and Android
+# Overview
+This repository provides an Android app for object detection using YOLOv8, along with Python scripts for dataset synchronization, model training, and inference. The model works for object detection, not semantic segmentation, and supports inferences on both images and videos.
 
-### Check the video to understand the code: https://youtu.be/dl7rCmvIyiI
+This repository leverages YOLO and SAM models to create datasets, synchronize labeled data, train and test models, which are then used in a mobile app for on-device inference.
 
-## Step 1 (Train and export Object detection model):
-- git clone https://github.com/AarohiSingla/Object-Detection-Android-App.git
-  
-- Train yolov8 model on custom dataset and export it in .tflite format. (Check train_export_yolov8_model.ipynb )
+### Requirements
+The project can be run on CPU, GPU, and MPS. It's recommended to install PyTorch with GPU support, depending on your hardware. Visit [PyTorch Installation Guide](https://pytorch.org/get-started/locally/) for instructions.
 
-## Step 2 (Object detection android app setup):
-- Open android_app folder.
+Python 3.11 is required to run the scripts. Install the packages using the requirements file: 
 
-- Put your .tflite model and .txt label file inside the assets folder. You can find assets folder at this location: <b> android_app\android_app\app\src\main\assets</b>
+```bash
+pip install -r requirements.txt
+```
 
-- Rename paths of your model and labels file in Constants.kt file. You can find Constants.kt at this location: <b>android_app\android_app\app\src\main\java\com\surendramaran\yolov8tflite </b>
+To sync datasets, create a `.env` file at the root directory and add:
+    plaintext
+    ROBOFLOW_API_KEY=<your_api_key>
+Otherwise, contact the administrator for access.
 
-- Download and install Android Studio from the official website (https://developer.android.com/studio)
+# Project Structure
+    plaintext
+    C:.
+    ├───android_app
+    │   └───android_app
+    │       ├───app
+    │       │   └───src
+    │       │       ├───androidTest
+    │       │       │   └───java/com/surendramaran/yolov8tflite
+    │       │       ├───main
+    │       │       │   ├───assets
+    │       │       │   ├───java/com/surendramaran/yolov8tflite
+    │       │       │   └───res
+    │       │       └───test
+    │       │           └───java/com/surendramaran/yolov8tflite
+    │       └───gradle/wrapper
+    ├───config
+    ├───runs/detect
+    ├───scripts/data_preparation
+    └───src/data_processing
 
-- Once installed, open Android Studio from your applications menu.
+# Main Commands
+### Dataset Synchronization
+To synchronize datasets from Roboflow:
+    sh
+    python scripts/sync_dataset.py
+The script takes `datasets_sync.yaml` with the following structure:
+    yaml
+    datasets:
+      - workspace: "psa00"
+        project: "merma-in-situ"
+        version: 1
+        format: "yolov8"
+        output_dir: "datasets/merma_in_situ"
+Modify or create a new YAML for custom datasets.
 
-- When Android Studio opens, you'll see a welcome screen. Here, you'll find options to create a new project, open an existing project, or check out project from version control.Since you already have a project, click on "Open an existing Android Studio project".
+### Model Training
+Train a YOLOv8 model:
+    sh
+    python scripts/train_model.py
+The training configuration should be specified in `training_config.yaml`:
+    yaml
+    model:
+      name: "crop_segmentation"
+      data_yaml: "datasets/crop_segmentation/data.yaml"
+      output_dir: "models/crop_segmentation"
 
-- Navigate to the directory where your project is located and select the project's root folder. 
+    training:
+      epochs: 250
+      batch_size: 16
+      imgsz: 640
+      device: "auto"
 
-- Build and Run
-![SAD1K9IGLAXS_jpg rf d634b3e06bebf7dd7d15b3e699e359d2](https://github.com/AarohiSingla/Object-Detection-Android-App/assets/60029146/08610d96-54e5-4425-85f9-c92e14f87a14)
+### Inference
+Run inference on images or videos:
+    sh
+    python scripts/inference.py
+Configuration example in `inference.yaml`:
+    yaml
+    model:
+      path: "models/pineaple_fruit_count/best.pt"
 
+    inference:
+      imgsz: 640
+      conf: 0.05
 
+    paths:
+      input: "data/pineaple/counting_data/pineaple_count.mp4"
+      output: "data/pineaple/counting_data/output/pineaple_count"
 
-
-## Credits
-
-This project includes code from the following repository:
+### Export to TFLite
+To use the trained model in the Android app (written in Kotlin), you need to convert the `.pt` model to `.tflite` format:
+    sh
+    python scripts/export_tflite.py
+The exported `.tflite` model should then be added to the Android app's assets directory for on-device inference.
