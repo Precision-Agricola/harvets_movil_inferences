@@ -1,0 +1,6 @@
+path: data/datasets/crop_segmentation
+train: images/train
+val: images/val
+
+names:
+  0: agave_crop

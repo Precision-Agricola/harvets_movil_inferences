@@ -1,5 +1,5 @@
 model:
-  path: "models/crop_segmentation/best.pt"
+  path: "models/crop_segmentation_yolo11/best.pt"
 
 inference:
   imgsz: 640 
