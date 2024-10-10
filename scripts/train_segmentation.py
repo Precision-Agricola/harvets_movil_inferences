@@ -70,7 +70,7 @@ def train_model(config: dict):
 
     # Load the segmentation model /(weights) using ultralytics
     try:
-        pretrained_model = 'yolov8n-seg.pt'
+        pretrained_model = 'yolo11n-seg.pt'
         model = YOLO(pretrained_model)
     except Exception as e:
         raise Exception(f"Failed to load {pretrained_model}: {e}")

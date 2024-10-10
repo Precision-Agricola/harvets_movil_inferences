@@ -4,7 +4,7 @@ model:
   output_dir: "models/crop_segmentation_yolo11"
 
 training:
-  epochs: 250
+  epochs: 750
   batch_size: 16
   imgsz: 640
   device: "auto"  # "auto", "cuda", or "cpu"
