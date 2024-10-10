@@ -1,7 +1,7 @@
 model:
-  name: "crop_segmentation"
+  name: "crop_segmentation_yolo11"
   data_yaml: "datasets/crop_segmentation/data.yaml"
-  output_dir: "models/crop_segmentation"
+  output_dir: "models/crop_segmentation_yolo11"
 
 training:
   epochs: 250

@@ -21,6 +21,6 @@ datasets:
   - workspace: "psa00"
     project: "crop_segmentation-tn6qn"
     version: 1
-    format: "yolov8"
+    format: "yolov11"
     output_dir: "datasets/crop_segmentation"
 
