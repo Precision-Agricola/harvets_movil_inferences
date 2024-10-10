@@ -6,6 +6,12 @@ This repository leverages YOLO and SAM models to create datasets, synchronize la
 ### Requirements
 The project can be run on CPU, GPU, and MPS. It's recommended to install PyTorch with GPU support, depending on your hardware. Visit [PyTorch Installation Guide](https://pytorch.org/get-started/locally/) for instructions.
 
+Python 3.11 is required to run the scripts. Install the packages using the requirements file: 
+
+```bash
+pip install -r requirements.txt
+```
+
 To sync datasets, create a `.env` file at the root directory and add:
     plaintext
     ROBOFLOW_API_KEY=<your_api_key>
