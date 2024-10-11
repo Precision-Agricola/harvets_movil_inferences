@@ -33,4 +33,4 @@ test_images/
 *.env
 
 # Export model tflite files
-*.py
+*.npy
