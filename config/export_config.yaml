@@ -1,0 +1,6 @@
+model:
+  input_path: 'models/jima_in_situ/best.pt'
+  export_dir: 'models/jima_in_situ'
+
+export:
+  imgsz: 640
