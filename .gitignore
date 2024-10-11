@@ -31,3 +31,6 @@ test_images/
 *.log
 *.out
 *.env
+
+# Export model tflite files
+*.py
