@@ -1,9 +1,9 @@
 # Training data and models should not be committed to the repository
-runs/
-data/
-datasets/
-models/
-test_images/
+runs/*
+data/*
+datasets/*
+models/*
+test_images/*
 
 # DS Store files for Mac
 *.DS_Store
